@@ -271,7 +271,7 @@ export default function Home() {
           </h1> */}
           {timers.map((timer) => (
             <div
-              className={`grid max-w-lg cursor-pointer grid-cols-1 gap-4 gap-4 rounded-xl bg-white/10 p-4 
+              className={`grid max-w-lg cursor-pointer grid-cols-1 gap-4 rounded-xl bg-white/10 p-4 
                 text-white transition duration-200 ease-in-out hover:bg-white/20 ${
                   timer.lastActive ? "bg-white/20 text-3xl" : "text-xl"
                 }`}
