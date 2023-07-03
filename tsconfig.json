@@ -29,5 +29,5 @@
     "**/*.cjs",
     "**/*.mjs"
   ],
-  "exclude": ["node_modules", "src"]
+  "exclude": ["node_modules"]
 }

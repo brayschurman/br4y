@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
 interface Timer {
   id: number;
@@ -8,6 +9,11 @@ interface Timer {
   isRunning: boolean;
   duration: number;
   lastActive: boolean;
+}
+
+interface Editing {
+  id: number | null;
+  field: "duration" | "name" | null;
 }
 
 export default function Home() {
@@ -37,8 +43,8 @@ export default function Home() {
     //   lastActive: false,
     // },
   ]);
-  const [editing, setEditing] = useState({ id: null, field: null });
-  const [inputString, setInputString] = useState("");
+  const [editing, setEditing] = useState<Editing>({ id: null, field: null });
+  const [inputString, setInputString] = useState<string>("");
   const [inputNumber, setInputNumber] = useState(0);
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export default function Home() {
       let startNextTimerIndex = null;
 
       const newTimers = timers.map((timer, index) => {
-        const updatedTimer = handleTimer(timer, index);
+        const updatedTimer = handleTimer(timer);
         if (updatedTimer.isRunning !== timer.isRunning) {
           startNextTimerIndex = index + 1;
         }
@@ -59,9 +65,10 @@ export default function Home() {
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timers]);
 
-  const handleTimer = (timer: Timer, index) => {
+  const handleTimer = (timer: Timer) => {
     if (!timer.isRunning) return timer;
     if (timer.timeRemaining !== 0) {
       return { ...timer, timeRemaining: timer.timeRemaining - 1 };
@@ -75,8 +82,11 @@ export default function Home() {
     };
   };
 
-  const handleNextTimer = (newTimers: Timer[], startNextTimerIndex: number) => {
-    if (startNextTimerIndex === null) {
+  const handleNextTimer = (
+    newTimers: Timer[],
+    startNextTimerIndex: number | null
+  ) => {
+    if (startNextTimerIndex === null || startNextTimerIndex === undefined) {
       return newTimers;
     }
 
@@ -84,14 +94,22 @@ export default function Home() {
       startNextTimerIndex = 0;
     }
 
-    handleSpeak(newTimers[startNextTimerIndex]);
+    const nextTimer = newTimers[startNextTimerIndex];
+    if (!nextTimer) return newTimers;
+    handleSpeak(nextTimer);
 
-    newTimers[startNextTimerIndex] = {
-      ...newTimers[startNextTimerIndex],
-      isRunning: true,
-      lastActive: true,
-      timeRemaining: newTimers[startNextTimerIndex].duration,
-    };
+    newTimers = newTimers.map((timer, index) => {
+      if (index === startNextTimerIndex) {
+        return {
+          ...timer,
+          isRunning: true,
+          lastActive: true,
+          timeRemaining: nextTimer.duration,
+        };
+      } else {
+        return timer;
+      }
+    });
 
     return newTimers;
   };
@@ -117,12 +135,16 @@ export default function Home() {
     }, 1000);
   };
 
-  const startEditing = (id, field, value) => {
+  const startEditing = (
+    id: number,
+    field: "duration" | "name",
+    value: string | number
+  ) => {
     setEditing({ id, field });
     if (field === "name") {
-      setInputString(value);
+      setInputString(value.toString());
     } else if (field === "duration") {
-      setInputNumber(value);
+      setInputNumber(Number(value));
     }
   };
 
@@ -130,14 +152,32 @@ export default function Home() {
     const newTimers = timers.map((timer) => {
       if (timer.id === editing.id) {
         if (editing.field === "name") {
-          return { ...timer, [editing.field]: inputString };
+          // use zod to validate the input
+          const nameSchema = z.string().min(1).max(20);
+          const result = nameSchema.safeParse(inputString);
+          if (result.success) {
+            return { ...timer, [editing.field]: inputString };
+          } else {
+            console.log(result);
+            return timer;
+          }
         } else if (editing.field === "duration") {
-          return { ...timer, [editing.field]: Number(inputNumber) };
+          const durationSchema = z.number().min(0).max(3600);
+          const result = durationSchema.safeParse(inputNumber);
+          if (result.success) {
+            return { ...timer, [editing.field]: Number(inputNumber) };
+          } else {
+            console.log(result);
+            return timer;
+          }
+        } else {
+          return timer;
         }
       } else {
         return timer;
       }
     });
+
     setTimers(newTimers);
     setEditing({ id: null, field: null });
     setInputString("");
@@ -153,6 +193,8 @@ export default function Home() {
           return { ...timer, isRunning: true };
         } else {
           const firstIndex = timers[0];
+          if (!firstIndex) return timer;
+
           if (timer.id === firstIndex.id) {
             if (timer.timeRemaining === 0) {
               return {
@@ -207,7 +249,7 @@ export default function Home() {
 
   const handleSkip = () => {
     let foundRunning = false;
-    const newTimers = timers.map((timer, index) => {
+    const newTimers = timers.map((timer) => {
       if (timer.isRunning) {
         foundRunning = true;
         return { ...timer, isRunning: false, lastActive: false };
@@ -222,7 +264,7 @@ export default function Home() {
   };
 
   const handlePrevious = () => {
-    let previousTimer = null;
+    let previousTimerIndex: number | null = null;
     let foundRunning = false;
     const newTimers = timers.map((timer, index) => {
       if (timer.isRunning) {
@@ -230,18 +272,22 @@ export default function Home() {
         return { ...timer, isRunning: false, lastActive: false };
       }
       if (!foundRunning) {
-        previousTimer = timer; // Keep track of the last non-running timer
+        previousTimerIndex = index; // Keep track of the last non-running timer
       }
       return timer;
     });
     // If there was a non-running timer before the running one, start it
-    if (previousTimer) {
-      newTimers[previousTimer.id - 1] = {
-        ...previousTimer,
-        isRunning: true,
-        lastActive: true,
-      };
+    if (previousTimerIndex !== null) {
+      const previousTimer = newTimers[previousTimerIndex];
+      if (previousTimer && typeof previousTimer.id === "number") {
+        newTimers[previousTimerIndex] = {
+          ...previousTimer,
+          isRunning: true,
+          lastActive: true,
+        };
+      }
     }
+
     setTimers(newTimers);
   };
 
