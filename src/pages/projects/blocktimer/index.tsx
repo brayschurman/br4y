@@ -303,7 +303,7 @@ export default function Home() {
                       type="number"
                       className="text-black"
                       value={inputNumber}
-                      onChange={(e) => setInputNumber(e.target.value)}
+                      onChange={(e) => setInputNumber(Number(e.target.value))}
                       onBlur={finishEditing}
                       autoFocus
                     />
