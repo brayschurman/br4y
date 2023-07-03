@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@font-face {
+  font-family: "Suisse";
+  src: url("/fonts/Suisse.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Nimbus";
+  src: url("/fonts/Nimbus.otf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
