@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 // import { signIn, signOut, useSession } from "next-auth/react";
 // import { api } from "~/utils/api";
 
@@ -20,30 +21,34 @@ const Home: NextPage = () => {
   const toggleMenu = (): void => setIsOpen(!isOpen);
 
   const menuItems: MenuItem[] = [
+    // {
+    //   href: "/music",
+    //   text: "Music",
+    // },
+    // {
+    //   href: "https://instagram.com/brayschurman",
+    //   text: "Instagram",
+    // },
+    // {
+    //   href: "/projects/blocktimer",
+    //   text: "BlockTimer",
+    // },
     {
-      href: "/music",
-      text: "Music",
+      href: "https://www.linkedin.com/in/brayschurman",
+      text: "LinkedIn",
     },
     {
-      href: "https://instagram.com/brayschurman",
-      text: "Instagram",
+      href: "https://github.com/brayschurman",
+      text: "Github",
     },
-    {
-      href: "/projects/blocktimer",
-      text: "BlockTimer",
-    },
-    {
-      href: "/app",
-      text: "App",
-    },
-    {
-      href: "contact",
-      text: "Contact",
-    },
-    {
-      href: "/info",
-      text: "Info",
-    },
+    // {
+    //   href: "contact",
+    //   text: "Contact",
+    // },
+    // {
+    //   href: "/info",
+    //   text: "Info",
+    // },
   ];
 
   return (
@@ -55,7 +60,7 @@ const Home: NextPage = () => {
       </Head>
 
       <nav className="fixed left-0 top-0 my-2 flex h-16 w-full items-center justify-between bg-black px-10">
-        <Link
+        {/* <Link
           href="/music"
           className="hidden text-xl text-white hover:text-teal-500 sm:block sm:text-[3rem]"
         >
@@ -66,13 +71,13 @@ const Home: NextPage = () => {
           className="hidden text-xl text-white hover:text-teal-500 sm:block sm:text-[3rem]"
         >
           Contact
-        </Link>
+        </Link> */}
 
         <div className="relative sm:hidden">
           <button
             type="button"
             onClick={toggleMenu}
-            className="items-center justify-center text-[2rem] text-xl text-white hover:text-teal-500"
+            className="hover:text-[#00FFD1]-500 items-center justify-center text-[2rem] text-xl text-white"
           >
             <div className="flex sm:hidden">Menu</div>
           </button>
@@ -82,7 +87,8 @@ const Home: NextPage = () => {
                 <Link
                   key={index}
                   href={item.href}
-                  className="block px-4 py-2 text-xl hover:text-teal-500"
+                  target="_blank"
+                  className="hover:text-[#00FFD1]-500 block px-4 py-2 text-xl"
                 >
                   {item.text}
                 </Link>
@@ -97,19 +103,28 @@ const Home: NextPage = () => {
           {/* <h1 className="font-suisse text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             BRAY
           </h1> */}
+          <Image
+            src="/images/bray.webp"
+            alt="RB"
+            width={300}
+            height={300}
+            className="rounded-full border-4 border-white"
+          />
+
           <h1
             style={{ fontFamily: "Nimbus" }}
-            className="whitespace-nowrap text-[14vw] font-extrabold tracking-wide text-white"
+            className="whitespace-nowrap text-[4vw] font-extrabold tracking-wide text-white"
           >
-            BR4Y
+            Bray Schurman
           </h1>
 
-          <div className="fixed bottom-0 my-2 flex hidden h-16 w-full items-center justify-between space-x-4 bg-black px-10 sm:flex">
+          <div className="fixed bottom-0 my-2 hidden h-16 w-full items-center justify-between space-x-4 bg-black px-10 sm:flex">
             {menuItems.map((item, index) => (
               <Link
                 key={index}
+                target="_blank"
                 href={item.href}
-                className="text-lg text-white hover:text-teal-500 sm:text-[2rem]"
+                className="text-lg text-white hover:text-[#00FFD1] sm:text-[2rem]"
               >
                 {item.text}
               </Link>
